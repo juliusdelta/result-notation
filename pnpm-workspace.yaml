@@ -1,0 +1,17 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "examples/*"
+  - "tools/*"
+
+catalog:
+  typescript: 7.0.1-rc
+  vite-plus: latest
+  zod: ^4.0.0
+  vitepress: ^2.0.0
+
+overrides:
+  vite: npm:@voidzero-dev/vite-plus-core@latest
+  # Pin this to the Vitest version bundled by your installed Vite+ version.
+  # Run: vp --version
+  vitest: 4.1.9

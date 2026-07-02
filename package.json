@@ -14,6 +14,7 @@
     "prepare": "vp config"
   },
   "devDependencies": {
+    "typescript": "catalog:",
     "vite-plus": "latest"
   },
   "overrides": {
