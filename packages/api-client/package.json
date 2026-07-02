@@ -1,0 +1,39 @@
+{
+  "name": "@result-notation/api-client",
+  "version": "0.0.0",
+  "description": "Type-safe HTTP client with typed routes, interceptors, Standard Schema validation, and non-throwing Result errors",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "prepublishOnly": "vp run build"
+  },
+  "dependencies": {
+    "@result-notation/core": "workspace:*",
+    "@standard-schema/spec": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.1-rc",
+    "vite-plus": "^0.1.20",
+    "zod": "^4.0.0"
+  }
+}
