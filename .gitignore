@@ -26,6 +26,9 @@ dist-ssr
 
 # AI agent worktrees
 .claude/worktrees/
+
+# npm lockfile (project uses pnpm)
+package-lock.json
 !.vscode/
 !.vscode/settings.json
 !.vscode/extensions.json

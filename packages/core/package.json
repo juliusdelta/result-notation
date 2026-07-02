@@ -2,15 +2,15 @@
   "name": "@result-notation/core",
   "version": "0.0.0",
   "description": "A typed Result monad for TypeScript — ok/err, match, map, unwrap, unwrapOr",
-  "homepage": "https://github.com/result-notation/core#readme",
+  "homepage": "https://github.com/juliusdelta/result-notation#readme",
   "bugs": {
-    "url": "https://github.com/result-notation/core/issues"
+    "url": "https://github.com/juliusdelta/result-notation/issues"
   },
   "license": "MIT",
   "author": "result-notation contributors",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/result-notation/core.git"
+    "url": "git+https://github.com/juliusdelta/result-notation.git"
   },
   "files": [
     "dist"
@@ -40,7 +40,7 @@
     "@types/node": "^25.6.2",
     "@typescript/native-preview": "7.0.0-dev.20260509.2",
     "bumpp": "^11.1.0",
-    "typescript": "^6.0.3",
-    "vite-plus": "^0.1.20"
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
   }
 }
