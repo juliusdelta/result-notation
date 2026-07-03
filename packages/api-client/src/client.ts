@@ -45,16 +45,10 @@ export type InferApiError<Def, TDefaultError = ApiClientError> =
         }[keyof S & number]
       : never);
 
-export type InferApiOptions<Def> = (Def extends { paramsSchema: StandardSchema }
-  ? { params: Record<string, unknown> }
-  : {}) &
-  (Def extends { searchSchema: StandardSchema } ? { search: Record<string, unknown> } : {}) &
-  (Def extends { bodySchema: StandardSchema } ? { body: Record<string, unknown> } : {}) & {
-    headers?: HeadersInit;
-    signal?: AbortSignal;
-    context?: Record<string, unknown>;
-    retry?: { maxAttempts?: number; backoffMs?: number | ((attempt: number) => number) };
-  };
+export type InferApiOptions<Def> = Omit<RequestOptions, "params" | "search" | "body"> &
+  (Def extends { paramsSchema: StandardSchema<infer TInput> } ? { params: TInput } : {}) &
+  (Def extends { searchSchema: StandardSchema<infer TInput> } ? { search: TInput } : {}) &
+  (Def extends { bodySchema: StandardSchema<infer TInput> } ? { body: TInput } : {});
 
 export class ApiClient<
   Registry extends EndpointRegistry = {},
@@ -105,14 +99,14 @@ export class ApiClient<
     return methods[method];
   }
 
-  private buildExecOptions(path: string, method: string, options: RequestOptions): ExecuteOptions {
+  private buildExecOptions(path: string, method: string, options: {}): ExecuteOptions {
     const definition = this.getDefinition(path, method) ?? {};
     const execOpts: ExecuteOptions = {
       method,
       baseUrl: this.config.baseUrl,
       path,
       definition,
-      options,
+      options: options as RequestOptions,
       interceptors: this.interceptors,
     };
     if (this.config.searchSerializer) execOpts.searchSerializer = this.config.searchSerializer;
@@ -125,18 +119,16 @@ export class ApiClient<
     path: Path,
     options?: InferApiOptions<Registry[Path]["GET"]>,
   ): Promise<Result<InferApiData<Registry[Path]["GET"]>, InferApiError<Registry[Path]["GET"]>>> {
-    return executeRequest(
-      this.buildExecOptions(path, "GET", (options ?? {}) as RequestOptions),
-    ) as Promise<Result<InferApiData<Registry[Path]["GET"]>, InferApiError<Registry[Path]["GET"]>>>;
+    return executeRequest(this.buildExecOptions(path, "GET", options ?? {})) as Promise<
+      Result<InferApiData<Registry[Path]["GET"]>, InferApiError<Registry[Path]["GET"]>>
+    >;
   }
 
   async post<Path extends keyof Registry & string>(
     path: Path,
     options?: InferApiOptions<Registry[Path]["POST"]>,
   ): Promise<Result<InferApiData<Registry[Path]["POST"]>, InferApiError<Registry[Path]["POST"]>>> {
-    return executeRequest(
-      this.buildExecOptions(path, "POST", (options ?? {}) as RequestOptions),
-    ) as Promise<
+    return executeRequest(this.buildExecOptions(path, "POST", options ?? {})) as Promise<
       Result<InferApiData<Registry[Path]["POST"]>, InferApiError<Registry[Path]["POST"]>>
     >;
   }
@@ -145,9 +137,9 @@ export class ApiClient<
     path: Path,
     options?: InferApiOptions<Registry[Path]["PUT"]>,
   ): Promise<Result<InferApiData<Registry[Path]["PUT"]>, InferApiError<Registry[Path]["PUT"]>>> {
-    return executeRequest(
-      this.buildExecOptions(path, "PUT", (options ?? {}) as RequestOptions),
-    ) as Promise<Result<InferApiData<Registry[Path]["PUT"]>, InferApiError<Registry[Path]["PUT"]>>>;
+    return executeRequest(this.buildExecOptions(path, "PUT", options ?? {})) as Promise<
+      Result<InferApiData<Registry[Path]["PUT"]>, InferApiError<Registry[Path]["PUT"]>>
+    >;
   }
 
   async patch<Path extends keyof Registry & string>(
@@ -156,9 +148,7 @@ export class ApiClient<
   ): Promise<
     Result<InferApiData<Registry[Path]["PATCH"]>, InferApiError<Registry[Path]["PATCH"]>>
   > {
-    return executeRequest(
-      this.buildExecOptions(path, "PATCH", (options ?? {}) as RequestOptions),
-    ) as Promise<
+    return executeRequest(this.buildExecOptions(path, "PATCH", options ?? {})) as Promise<
       Result<InferApiData<Registry[Path]["PATCH"]>, InferApiError<Registry[Path]["PATCH"]>>
     >;
   }
@@ -169,9 +159,7 @@ export class ApiClient<
   ): Promise<
     Result<InferApiData<Registry[Path]["DELETE"]>, InferApiError<Registry[Path]["DELETE"]>>
   > {
-    return executeRequest(
-      this.buildExecOptions(path, "DELETE", (options ?? {}) as RequestOptions),
-    ) as Promise<
+    return executeRequest(this.buildExecOptions(path, "DELETE", options ?? {})) as Promise<
       Result<InferApiData<Registry[Path]["DELETE"]>, InferApiError<Registry[Path]["DELETE"]>>
     >;
   }
@@ -227,9 +215,7 @@ export class ApiClient<
   ): Promise<
     Result<StreamResult<InferApiData<Registry[Path]["GET"]>, ApiClientError>, ApiClientError>
   > {
-    const result = await executeRequest(
-      this.buildExecOptions(path, "GET", (options ?? {}) as RequestOptions),
-    );
+    const result = await executeRequest(this.buildExecOptions(path, "GET", options ?? {}));
     if (!result.ok) {
       return err(result.error as ApiClientError);
     }
@@ -258,9 +244,7 @@ export class ApiClient<
     path: Path,
     options?: InferApiOptions<Registry[Path]["GET"]> & SseOptions,
   ): Promise<Result<SseStream<unknown, ApiClientError>, ApiClientError>> {
-    const result = await executeRequest(
-      this.buildExecOptions(path, "GET", (options ?? {}) as RequestOptions),
-    );
+    const result = await executeRequest(this.buildExecOptions(path, "GET", options ?? {}));
     if (!result.ok) {
       return err(result.error as ApiClientError);
     }

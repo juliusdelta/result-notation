@@ -1,4 +1,4 @@
-import { expect, test, describe } from "vite-plus/test";
+import { expect, test, describe } from "vitest";
 import { ok, err, Ok, Err, match } from "../src/index";
 import type { Result } from "../src/index";
 
