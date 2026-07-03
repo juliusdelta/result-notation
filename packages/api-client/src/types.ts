@@ -5,8 +5,7 @@ export type StandardSchema<TInput = unknown, TOutput = TInput> = StandardSchemaV
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export type HttpTransport = "http";
-export type SseTransport = "sse";
-export type Transport = HttpTransport | SseTransport;
+export type Transport = HttpTransport;
 
 export type RetryOptions = {
   maxAttempts?: number;
@@ -33,10 +32,7 @@ export type EndpointDefinition<
   bodySerializer?: (body: unknown) => BodyInit | undefined;
 };
 
-export type EndpointRegistry = Record<
-  string,
-  Partial<Record<HttpMethod | "sse", EndpointDefinition>>
->;
+export type EndpointRegistry = Record<string, Partial<Record<HttpMethod, EndpointDefinition>>>;
 
 export type RequestOptions = {
   params?: Record<string, unknown>;
@@ -47,13 +43,3 @@ export type RequestOptions = {
   context?: Record<string, unknown>;
   retry?: RetryOptions;
 };
-
-export type SocketRegistry = Record<
-  string,
-  {
-    searchSchema?: StandardSchema;
-    incoming?: Record<string, StandardSchema>;
-    outgoing?: Record<string, StandardSchema>;
-    errorSchema?: StandardSchema;
-  }
->;

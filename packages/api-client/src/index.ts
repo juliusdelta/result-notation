@@ -2,13 +2,11 @@ export type {
   StandardSchema,
   HttpMethod,
   HttpTransport,
-  SseTransport,
   Transport,
   RetryOptions,
   EndpointDefinition,
   EndpointRegistry,
   RequestOptions,
-  SocketRegistry,
 } from "./types";
 
 export { extractParams, substituteParams, matchPath } from "./route-matcher";
@@ -68,9 +66,3 @@ export { ApiClient, createApiClient } from "./client";
 
 export type { StreamResult, StreamOptions } from "./stream";
 export { createStream } from "./stream";
-
-export type { SseEvent, SseStream, SseOptions } from "./sse";
-export { createSseStream } from "./sse";
-
-export type { WebSocketSession, WebSocketOptions } from "./websocket";
-export { createWebSocketSession } from "./websocket";

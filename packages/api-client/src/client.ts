@@ -1,25 +1,14 @@
 import type { Result } from "@result-notation/core";
 import { ok, err } from "@result-notation/core";
-import type {
-  EndpointRegistry,
-  SocketRegistry,
-  EndpointDefinition,
-  RequestOptions,
-  StandardSchema,
-} from "./types";
+import type { EndpointRegistry, EndpointDefinition, RequestOptions, StandardSchema } from "./types";
 import type { Interceptor } from "./interceptor";
 import type { ApiClientError, HttpError } from "./errors";
 import { unknownError } from "./errors";
 import type { SearchSerializer, BodySerializer } from "./serializers";
-import { defaultSearchSerializer } from "./serializers";
 import { executeRequest } from "./request";
 import type { ExecuteOptions } from "./request";
 import type { StreamResult, StreamOptions } from "./stream";
 import { createStream } from "./stream";
-import type { SseStream, SseOptions } from "./sse";
-import { createSseStream } from "./sse";
-import type { WebSocketSession, WebSocketOptions } from "./websocket";
-import { createWebSocketSession } from "./websocket";
 
 export type ClientConfig = {
   baseUrl: string;
@@ -50,20 +39,15 @@ export type InferApiOptions<Def> = Omit<RequestOptions, "params" | "search" | "b
   (Def extends { searchSchema: StandardSchema<infer TInput> } ? { search: TInput } : {}) &
   (Def extends { bodySchema: StandardSchema<infer TInput> } ? { body: TInput } : {});
 
-export class ApiClient<
-  Registry extends EndpointRegistry = {},
-  Sockets extends SocketRegistry = {},
-> {
+export class ApiClient<Registry extends EndpointRegistry = {}> {
   private config: ClientConfig;
   private interceptors: Interceptor[];
   private routes: Map<string, Partial<Record<string, EndpointDefinition>>>;
-  private sockets: Map<string, SocketRegistry[string]>;
 
   constructor(config: ClientConfig) {
     this.config = config;
     this.interceptors = [];
     this.routes = new Map();
-    this.sockets = new Map();
   }
 
   use(interceptor: Interceptor): this {
@@ -73,7 +57,7 @@ export class ApiClient<
 
   registerRoutes<const NewRegistry extends EndpointRegistry>(
     registry: NewRegistry,
-  ): ApiClient<Registry & NewRegistry, Sockets> {
+  ): ApiClient<Registry & NewRegistry> {
     for (const [path, methods] of Object.entries(registry)) {
       const existing = this.routes.get(path) ?? {};
       for (const [method, def] of Object.entries(methods as Record<string, EndpointDefinition>)) {
@@ -81,16 +65,7 @@ export class ApiClient<
       }
       this.routes.set(path, existing);
     }
-    return this as unknown as ApiClient<Registry & NewRegistry, Sockets>;
-  }
-
-  registerSockets<const NewSockets extends SocketRegistry>(
-    sockets: NewSockets,
-  ): ApiClient<Registry, Sockets & NewSockets> {
-    for (const [path, def] of Object.entries(sockets)) {
-      this.sockets.set(path, def);
-    }
-    return this as unknown as ApiClient<Registry, Sockets & NewSockets>;
+    return this as unknown as ApiClient<Registry & NewRegistry>;
   }
 
   private getDefinition(path: string, method: string): EndpointDefinition | undefined {
@@ -239,78 +214,8 @@ export class ApiClient<
       return err(unknownError(error));
     }
   }
-
-  async sse<Path extends keyof Registry & string>(
-    path: Path,
-    options?: InferApiOptions<Registry[Path]["GET"]> & SseOptions,
-  ): Promise<Result<SseStream<unknown, ApiClientError>, ApiClientError>> {
-    const result = await executeRequest(this.buildExecOptions(path, "GET", options ?? {}));
-    if (!result.ok) {
-      return err(result.error as ApiClientError);
-    }
-
-    const response = (result as unknown as { value: { response: Response } }).value.response;
-    const definition = this.getDefinition(path, "GET");
-    const eventSchemas = (definition as Record<string, unknown>)["eventSchemas"] as
-      | Record<string, never>
-      | undefined;
-
-    try {
-      const sseStream = await createSseStream(
-        response,
-        (eventSchemas ?? {}) as Record<string, never>,
-        options?.reconnect,
-        this.config.fetch,
-      );
-      return ok(sseStream);
-    } catch (error) {
-      return err(unknownError(error));
-    }
-  }
-
-  async websocket<Path extends keyof Sockets & string>(
-    path: Path,
-    options?: { search?: Record<string, unknown> } & WebSocketOptions,
-  ): Promise<
-    Result<WebSocketSession<Record<string, never>, Record<string, never>, unknown>, ApiClientError>
-  > {
-    const socketDef = this.sockets.get(path);
-    if (!socketDef) {
-      return err({
-        kind: "UnknownError",
-        message: `No socket registered for path: ${path}`,
-      } as ApiClientError);
-    }
-
-    const baseUrl = this.config.baseUrl.replace(/\/+$/, "");
-    let searchString = "";
-    if (options?.search) {
-      searchString = `?${(this.config.searchSerializer ?? defaultSearchSerializer)(
-        options.search as Record<string, unknown>,
-      ).toString()}`;
-    }
-
-    const wsUrl = baseUrl.replace(/^http/, "ws") + path + searchString;
-
-    try {
-      const session = await createWebSocketSession<
-        Record<string, never>,
-        Record<string, never>,
-        unknown
-      >(
-        wsUrl,
-        (socketDef.incoming ?? {}) as Record<string, never>,
-        (socketDef.outgoing ?? {}) as Record<string, never>,
-        socketDef.errorSchema ?? null,
-        options,
-      );
-      return session;
-    } catch (error) {
-      return err(unknownError(error));
-    }
-  }
 }
 
-export function createApiClient(config: ClientConfig): ApiClient<{}, {}> {
+export function createApiClient(config: ClientConfig): ApiClient<{}> {
   return new ApiClient(config);
 }

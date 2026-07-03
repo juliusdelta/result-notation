@@ -4,10 +4,10 @@ A type-safe Result monad and HTTP client toolkit for TypeScript.
 
 ## Packages
 
-| Package                                                     | Description                                                                  |
-| ----------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| [`@result-notation/core`](#result-notationcore)             | Lightweight Result monad with zero dependencies                              |
-| [`@result-notation/api-client`](#result-notationapi-client) | Type-safe HTTP client with interceptors, schemas, streaming, SSE & WebSocket |
+| Package                                                     | Description                                                     |
+| ----------------------------------------------------------- | --------------------------------------------------------------- |
+| [`@result-notation/core`](#result-notationcore)             | Lightweight Result monad with zero dependencies                 |
+| [`@result-notation/api-client`](#result-notationapi-client) | Type-safe HTTP client with interceptors, schemas, and streaming |
 
 ---
 
@@ -197,63 +197,6 @@ for await (const event of stream) {
 }
 
 await stream.cancel();
-```
-
-### Server-Sent Events (SSE)
-
-```typescript
-const api = createApiClient({ baseUrl: "https://api.example.com" }).registerRoutes({
-  "/sse": {
-    GET: {
-      responseSchema: z.any(),
-      sse: { message: z.object({ text: z.string() }) },
-    },
-  },
-});
-
-const stream = await api.sse("/sse", {
-  reconnect: { enabled: true, maxAttempts: 5 },
-});
-
-for await (const event of stream) {
-  if (event.ok) {
-    event.value; // { type: "message", data: { text: string } }
-  }
-}
-
-await stream.close();
-```
-
-### WebSocket
-
-```typescript
-const api = createApiClient({ baseUrl: "https://api.example.com" }).registerSockets({
-  "/chat/:roomId": {
-    incoming: {
-      message: z.object({ user: z.string(), text: z.string() }),
-      join: z.object({ user: z.string() }),
-    },
-    outgoing: {
-      send: z.object({ text: z.string() }),
-    },
-  },
-});
-
-const result = await api.websocket("/chat/:roomId", {
-  search: { roomId: "general" },
-  reconnect: { enabled: true },
-});
-
-if (result.ok) {
-  const ws = result.value;
-  ws.send("send", { text: "hello" });
-
-  for await (const msg of ws) {
-    if (msg.ok) {
-      msg.value; // { type: "message" | "join", data: ... }
-    }
-  }
-}
 ```
 
 ### Standalone utilities
