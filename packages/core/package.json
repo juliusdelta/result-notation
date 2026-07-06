@@ -1,6 +1,6 @@
 {
   "name": "@result-notation/core",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha.0",
   "description": "A typed Result monad for TypeScript — ok/err, match, map, unwrap, unwrapOr",
   "homepage": "https://github.com/juliusdelta/result-notation#readme",
   "bugs": {
