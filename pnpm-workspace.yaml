@@ -9,6 +9,7 @@ catalog:
   vite-plus: latest
   zod: ^4.0.0
   vitepress: ^2.0.0
+  vitest: 4.1.9
 
 overrides:
   vite: npm:@voidzero-dev/vite-plus-core@latest
