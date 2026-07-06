@@ -15,7 +15,7 @@ export type ClientConfig = {
   baseHeaders?: HeadersInit;
   searchSerializer?: SearchSerializer;
   bodySerializer?: BodySerializer;
-  normalizeResponse?: (body: unknown) => unknown | Promise<unknown>;
+  normalizeResponse?: (body: unknown) => unknown;
   fetch?: typeof globalThis.fetch;
 };
 

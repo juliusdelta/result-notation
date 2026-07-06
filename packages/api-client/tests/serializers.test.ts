@@ -36,4 +36,45 @@ describe("serializers", () => {
       expect(defaultJsonBodySerializer(undefined)).toBeUndefined();
     });
   });
+
+  describe("multipartBodySerializer", () => {
+    it("returns undefined for undefined body", () => {
+      expect(multipartBodySerializer(undefined)).toBeUndefined();
+    });
+
+    it("returns FormData as-is", () => {
+      const fd = new FormData();
+      fd.set("key", "value");
+      const result = multipartBodySerializer(fd);
+      expect(result).toBe(fd);
+    });
+
+    it("converts object to FormData", () => {
+      const result = multipartBodySerializer({ name: "test", count: 42 });
+      expect(result).toBeInstanceOf(FormData);
+      const fd = result as FormData;
+      expect(fd.get("name")).toBe("test");
+      expect(fd.get("count")).toBe("42");
+    });
+
+    it("skips undefined values", () => {
+      const result = multipartBodySerializer({ a: "keep", b: undefined });
+      const fd = result as FormData;
+      expect(fd.get("a")).toBe("keep");
+      expect(fd.has("b")).toBe(false);
+    });
+
+    it("handles arrays as repeated keys", () => {
+      const result = multipartBodySerializer({ tags: ["a", "b", "c"] });
+      const fd = result as FormData;
+      expect(fd.getAll("tags")).toEqual(["a", "b", "c"]);
+    });
+
+    it("handles Blob values", () => {
+      const blob = new Blob(["hello"], { type: "text/plain" });
+      const result = multipartBodySerializer({ file: blob });
+      const fd = result as FormData;
+      expect(fd.get("file")).toBeInstanceOf(Blob);
+    });
+  });
 });

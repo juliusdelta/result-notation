@@ -19,7 +19,7 @@ export type ExecuteOptions = {
   interceptors: Interceptor[];
   searchSerializer?: SearchSerializer;
   bodySerializer?: BodySerializer;
-  normalizeResponse?: (body: unknown) => unknown | Promise<unknown>;
+  normalizeResponse?: (body: unknown) => unknown;
 };
 
 export async function executeRequest<TData, TError>(

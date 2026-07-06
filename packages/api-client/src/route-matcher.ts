@@ -15,7 +15,7 @@ export function substituteParams(pattern: string, params: Record<string, unknown
     if (value === undefined) {
       return `:${key}`;
     }
-    return String(value);
+    return String(value as string | number | boolean);
   });
 }
 

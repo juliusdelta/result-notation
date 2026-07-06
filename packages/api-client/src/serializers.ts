@@ -23,7 +23,7 @@ export const defaultSearchSerializer: SearchSerializer = (params: Record<string,
 function serializeValue(value: unknown): string {
   if (value instanceof Date) return value.toISOString();
   if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
+  return String(value as string | number | boolean | bigint);
 }
 
 export const defaultJsonBodySerializer: BodySerializer = (body: unknown): BodyInit | undefined => {
@@ -48,7 +48,7 @@ export const multipartBodySerializer: BodySerializer = (body: unknown): BodyInit
       } else if (value instanceof File || value instanceof Blob) {
         formData.append(key, value);
       } else {
-        formData.set(key, String(value));
+        formData.set(key, String(value as string | number | boolean));
       }
     }
   }
