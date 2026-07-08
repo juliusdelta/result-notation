@@ -1,5 +1,11 @@
 # @result-notation/api-client
 
+## 0.0.1-alpha.1
+
+### Patch Changes
+
+- 0aea611: Fix bug where baseHeaders were not properly merged
+
 ## 0.0.1-alpha.0
 
 ### Patch Changes
