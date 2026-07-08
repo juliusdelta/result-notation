@@ -74,19 +74,38 @@ export class ApiClient<Registry extends EndpointRegistry = {}> {
     return methods[method];
   }
 
+  private mergeHeaders(base?: HeadersInit, override?: HeadersInit): HeadersInit | undefined {
+    if (!base && !override) return undefined;
+    const merged = new Headers(base);
+    if (override) {
+      const overrideHeaders = new Headers(override);
+      for (const [key, value] of overrideHeaders.entries()) {
+        merged.set(key, value);
+      }
+    }
+    return merged;
+  }
+
   private buildExecOptions(path: string, method: string, options: {}): ExecuteOptions {
     const definition = this.getDefinition(path, method) ?? {};
+    const reqOptions = options as RequestOptions;
+    const mergedHeaders = this.mergeHeaders(this.config.baseHeaders, reqOptions.headers);
     const execOpts: ExecuteOptions = {
       method,
       baseUrl: this.config.baseUrl,
       path,
       definition,
-      options: options as RequestOptions,
+      options: {
+        ...reqOptions,
+        ...(mergedHeaders ? { headers: mergedHeaders } : {}),
+      },
       interceptors: this.interceptors,
     };
+
     if (this.config.searchSerializer) execOpts.searchSerializer = this.config.searchSerializer;
     if (this.config.bodySerializer) execOpts.bodySerializer = this.config.bodySerializer;
     if (this.config.normalizeResponse) execOpts.normalizeResponse = this.config.normalizeResponse;
+
     return execOpts;
   }
 
