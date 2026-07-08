@@ -6,5 +6,5 @@
     "@result-notation/api-client": "0.0.0",
     "@result-notation/core": "0.0.0"
   },
-  "changesets": []
+  "changesets": ["stale-clubs-laugh"]
 }
